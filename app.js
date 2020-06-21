@@ -2,6 +2,7 @@ const createError = require('http-errors');
 const express = require('express');
 const app = express();
 
+const initDatabase = require('./config/database')();
 const initMiddleware = require('./config/middleware')(app);
 const initRoutes = require('./routes/index')(app);
 

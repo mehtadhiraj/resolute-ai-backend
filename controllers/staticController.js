@@ -2,6 +2,7 @@ const jwt =  require('jsonwebtoken');
 const fs = require('fs');
 const mime = require('mime');
 const path = require('path');
+const User = require('../models/User');
 
 const home = function(req, res){
     res.json({
