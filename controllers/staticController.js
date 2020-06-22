@@ -3,9 +3,6 @@ const fs = require('fs');
 const mime = require('mime');
 const path = require('path');
 const Models = require('../models');
-const bcrypt = require('bcrypt');
-const { Op } = require("sequelize");
-// const User = require('../models/User');
 
 const home = function(req, res){
     res.json({
@@ -18,7 +15,31 @@ const login = async function(req, res){
     let userDetails = await Models.User.findOne({ attributes: { exclude: ["createdAt", "updatedAt"] }, where: { username: req.body.username }});
     let isMatch = userDetails._modelOptions.instanceMethods.validPassword(req.body.password, userDetails.password);    
     delete userDetails.dataValues.password;
-    // console.log(userDetails.dataValues, isMatch);
+    if(userDetails.role === 'admin'){
+        let users= await Models.User.findAll({attributes: { exclude: ["password", "createdAt", "updatedAt", "images"] }, where: {role: 'user'}});
+        let userArray = [];
+        users.forEach((user)=>{
+            userArray.push(user.dataValues);
+        })
+        // userArray = userArray.dataValues;
+        // console.log(userArray);
+        userDetails.dataValues.userArray = userArray;
+    }else{
+        let images = [];
+        let folderPath = __dirname + userDetails.images + userDetails.id.toString() + "-" + userDetails.username.toString();
+        try{
+            fs.readdirSync(folderPath).forEach((image)=>{
+                var imagesPath = "http://localhost:3001/uploads/" + userDetails.id.toString() + "-" + userDetails.username.toString() + "/" + image;
+                images.push(imagesPath);
+            })
+        
+        }catch(error){
+            console.error(error);
+        }
+        userDetails.dataValues.images = images;
+        // console.log(userDetails.dataValues);
+    }
+    // console.log(userDetails.dataValues);
     if(!isMatch){
         res.status(403);
         res.json({
@@ -32,7 +53,7 @@ const login = async function(req, res){
                     message: error
                 });
             }else{
-                console.log(token);
+                // console.log(token);
                 res.json({
                     message: "success",
                     token
@@ -50,7 +71,7 @@ const register = async function(req, res){
     // console.log(userDetails);
     try {
         let newUser = await Models.User.create(userDetails);
-        console.log(newUser);
+        // console.log(newUser);
         let userId = newUser.id;
         let dirName = __dirname + "/../public/uploads/"+userId.toString()+"-"+newUser.username;
         if (!fs.existsSync(dirName)){
