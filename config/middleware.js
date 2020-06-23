@@ -8,18 +8,15 @@ const cors = require('cors');
 
 const initMiddleware = function(app){
     console.log("Initializing Middleware...");
-    app.use(cors());
-
-    // view engine setup
-    // app.set('views', path.join(__dirname, 'views'));
-    // app.set('view engine', 'ejs');
-
+    
+    app.use(cors()); // initialize coors for cross origin request
     app.use(logger('dev'));
+    // Limit set to 50mb to accept the learge size images from the client
     app.use(express.json({limit: '50mb'}));
     app.use(express.urlencoded({limit: '50mb', extended: true}));
-    // app.use(bodyParser.urlencoded({ extended: true, parameterLimit:50000, limit: '50mb' }));
-    // app.use(bodyParser.json({ limit: '50mb' }));
+    
     app.use(cookieParser());
+    //Set public forlder to static to get access of the images stored in it.
     app.use(express.static(path.join(__dirname, '../public')));
     
     console.log("Middleware Initialized.");

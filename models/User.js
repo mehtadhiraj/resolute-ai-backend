@@ -42,12 +42,14 @@ module.exports = (sequelize, DataTypes) => {
     }
   }, {
     hooks:{
+      // encrypt password before storing in database
       beforeCreate: async function(user) {
           const salt = await bcrypt.genSalt(10); //whatever number you want
           user.password = await bcrypt.hash(user.password, salt);
       }
     },
     instanceMethods: {
+      //Method to validate a password
       validPassword: function(password, storedPassword) {
         return bcrypt.compareSync(password, storedPassword); 
       }
